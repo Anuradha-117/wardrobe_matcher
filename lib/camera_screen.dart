@@ -58,7 +58,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 Positioned.fill(
                   child: Image.file(
                     widget.userImage,
-                    fit: BoxFit.cover, // Stretches the image to fit the screen
+                    fit: BoxFit.contain, // Stretches the image to fit the screen
                   ),
                 ),
 
