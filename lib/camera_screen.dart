@@ -28,7 +28,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     _controller = CameraController(backCamera, ResolutionPreset.high);
     _initializeControllerFuture = _controller!.initialize();
-    
+
     if (mounted) {
       setState(() {});
     }
@@ -47,18 +47,21 @@ class _CameraScreenState extends State<CameraScreen> {
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done && _controller != null) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              _controller != null) {
             return Stack(
-              fit: StackFit.expand, 
+              fit: StackFit.expand,
               children: [
                 // Live Cam Feed
                 CameraPreview(_controller!),
 
-                // Transparent PNG
                 Positioned.fill(
-                  child: Image.file(
-                    widget.userImage,
-                    fit: BoxFit.contain, // Stretches the image to fit the screen
+                  child: InteractiveViewer(
+                    panEnabled: true, 
+                    scaleEnabled: true, 
+                    minScale: 0.5, 
+                    maxScale: 4.0, 
+                    child: Image.file(widget.userImage, fit: BoxFit.contain),
                   ),
                 ),
 
@@ -67,7 +70,11 @@ class _CameraScreenState extends State<CameraScreen> {
                   top: 40,
                   left: 20,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 35,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -75,7 +82,9 @@ class _CameraScreenState extends State<CameraScreen> {
             );
           } else {
             // loading circle till cam opens
-            return const Center(child: CircularProgressIndicator(color: Colors.white));
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            );
           }
         },
       ),
