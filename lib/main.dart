@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'camera_screen.dart';
 
 void main() =>
     runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
@@ -60,18 +61,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             SizedBox(height: 40),
-            ElevatedButton.icon(
-              icon: Icon(Icons.camera),
-              label: Text("3. Open AR Matcher"),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: _userImage == null ? Colors.grey : Colors.blue,
-              ),
+            FilledButton.icon(
               onPressed: _userImage == null
                   ? null
                   : () {
-                      // Camera screen will add
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CameraScreen(userImage: _userImage!),
+                        ),
+                      );
                     },
+              icon: const Icon(Icons.camera_alt),
+              label: const Text("3. Start AR Matcher"),
             ),
           ],
         ),
