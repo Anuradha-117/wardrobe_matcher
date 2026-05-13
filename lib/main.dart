@@ -34,49 +34,136 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Wardrobe Matcher")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ElevatedButton.icon(
-              icon: Icon(Icons.cut),
-              label: Text("1. Remove Background (Web)"),
-              onPressed: _launchURL,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: Icon(Icons.image),
-              label: Text("2. Load Transparent PNG"),
-              onPressed: _pickImage,
-            ),
-            if (_userImage != null) ...[
-              SizedBox(height: 20),
-              Text(
-                "Image Loaded Successfully!",
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          'AR Wardrobe Matcher',
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 1,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                "Setup Your AR Avatar",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.green),
               ),
-            ],
-            SizedBox(height: 40),
-            FilledButton.icon(
-              onPressed: _userImage == null
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CameraScreen(userImage: _userImage!),
+              const SizedBox(height: 30),
+
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.auto_fix_high,
+                        size: 40,
+                        color: Colors.purpleAccent,
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Step 1: Create your cutout",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                      );
-                    },
-              icon: const Icon(Icons.camera_alt),
-              label: const Text("3. Start AR Matcher"),
-            ),
-          ],
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: _launchURL,
+                        icon: const Icon(Icons.open_in_browser),
+                        label: const Text("Open Remove.bg"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      Icon(
+                        _userImage == null
+                            ? Icons.image_search
+                            : Icons.check_circle,
+                        size: 40,
+                        color: _userImage == null
+                            ? Colors.blueAccent
+                            : Colors.green,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _userImage == null
+                            ? "Step 2: Load your PNG"
+                            : "Image Loaded Successfully!",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.upload_file),
+                        label: Text(
+                          _userImage == null ? "Select Image" : "Change Image",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+              SizedBox(
+                height: 60,
+                child: FilledButton.icon(
+                  onPressed: _userImage == null
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CameraScreen(userImage: _userImage!),
+                            ),
+                          );
+                        },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  icon: const Icon(Icons.view_in_ar, size: 28),
+                  label: const Text(
+                    "Launch AR Matcher",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
