@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text(
-          'AR Wardrobe Matcher',
+          'ClosetLens',
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
         ),
         centerTitle: true,
