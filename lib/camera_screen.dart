@@ -77,62 +77,76 @@ class _CameraScreenState extends State<CameraScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               _controller != null) {
-            return Screenshot(
-              controller: _screenshotController,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Live Cam Feed
-                  CameraPreview(_controller!),
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                
+                Screenshot(
+                  controller: _screenshotController,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Live Cam Feed
+                      CameraPreview(_controller!),
 
-                  Positioned.fill(
-                    child: InteractiveViewer(
-                      panEnabled: true,
-                      scaleEnabled: true,
-                      minScale: 0.5,
-                      maxScale: 4.0,
-                      child: Image.file(widget.userImage, fit: BoxFit.contain),
-                    ),
-                  ),
-
-                  // made to bck frm cam screen
-                  Positioned(
-                    top: 40,
-                    left: 20,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-
-                  // take picture button
-                  Positioned(
-                    bottom: 40,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: _captureAndSave,
-                        child: Container(
-                          height: 80,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
+                      Positioned.fill(
+                        child: InteractiveViewer(
+                          panEnabled: true,
+                          scaleEnabled: true,
+                          minScale: 0.5,
+                          maxScale: 4.0,
+                          child: Image.file(
+                            widget.userImage,
+                            fit: BoxFit.contain,
                           ),
-                          child: const Center(
-                            child: Icon(Icons.camera, color: Colors.white, size: 40),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // moved the buttons outsde to prevent from showg in saved images
+                // made to bck frm cam screen
+                Positioned(
+                  top: 40,
+                  left: 20,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 35,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+
+                // take picture button
+                Positioned(
+                  bottom: 40,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: _captureAndSave,
+                      child: Container(
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 4),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.camera,
+                            color: Colors.white,
+                            size: 40,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           } else {
             // loading circle till cam opens
