@@ -81,15 +81,56 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      OutlinedButton.icon(
-                        onPressed: _launchURL,
-                        icon: const Icon(Icons.open_in_browser),
-                        label: const Text("Open Remove.bg"),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _launchURL,
+                            icon: const Icon(Icons.open_in_browser),
+                            label: const Text("Open Remove.bg"),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.help_outline),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("How To Do"),
+                                    content: const Text(''' 
+1. Open Remove.bg using the button.
+
+2. Upload a full-body photo of yourself.
+
+3. Switch to the 'Cutout' tab and use Eraser.
+
+4. Erase the clothing item you want to 
+   replace (e.g., your shirt).
+
+5. Download the image.
+                                    '''),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("close"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
               Card(
@@ -113,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 10),
                       Text(
                         _userImage == null
-                            ? "Step 2: Load your PNG"
+                            ? "Step 2: Load your downloaded image"
                             : "Image Loaded Successfully!",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
