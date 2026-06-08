@@ -3,14 +3,17 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'camera_screen.dart';
 import 'package:google_mlkit_subject_segmentation/google_mlkit_subject_segmentation.dart';
+import 'package:path_provider/path_provider.dart'; // Added for temp storage
 
-void main() => runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
+void main() => runApp(
+  const MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()),
+);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState(); 
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -27,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _userImage = file;
       });
-      
-      //  Automatically trigger the AI once the image is selected! 
+
+      //  Automatically trigger the AI once the image is selected!
       await _processImageWithAI(file);
     }
   }
@@ -41,32 +44,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       // Prepare the imag
-      final inputImage = InputImage.fromFile(originalImage); 
-      
+      final inputImage = InputImage.fromFile(originalImage);
+
       //Initialize the AI Segmenter
       final options = SubjectSegmenterOptions(
         enableForegroundBitmap: true,
-        enableForegroundConfidenceMask: false, 
-        enableMultipleSubjects: SubjectResultOptions( 
+        enableForegroundConfidenceMask: false,
+        enableMultipleSubjects: SubjectResultOptions(
           enableConfidenceMask: false,
           enableSubjectBitmap: false,
         ),
       );
-      final segmenter = SubjectSegmenter(options: options); 
+      final segmenter = SubjectSegmenter(options: options);
 
       //Run the on-device AI processing
-      final result = await segmenter.processImage(inputImage); 
-      
+      final result = await segmenter.processImage(inputImage);
+
       // Retriev the  cutout
       final foregroundBitmap = result.foregroundBitmap;
-      
+
       if (foregroundBitmap != null) {
         debugPrint("AI successfully cut out the subject!");
-        // TODO: Map the bitmap bytes into an image file for layering
+
+        // Create a temporary file on the device
+        final directory = await getTemporaryDirectory();
+        final filePath =
+            '${directory.path}/cutout_${DateTime.now().millisecondsSinceEpoch}.png';
+        final transparentFile = await File(
+          filePath,
+        ).writeAsBytes(foregroundBitmap);
+
+        // Overwrite the original background image with the transparent cutout
+        setState(() {
+          _userImage = transparentFile;
+        });
       }
 
-      segmenter.close(); 
-
+      segmenter.close();
     } catch (e) {
       debugPrint("AI Processing Error: $e");
     } finally {
