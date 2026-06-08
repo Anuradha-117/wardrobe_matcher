@@ -1,32 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'camera_screen.dart';
+import 'package:google_mlkit_subject_segmentation/google_mlkit_subject_segmentation.dart';
 
-void main() =>
-    runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
+void main() => runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState(); 
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   File? _userImage;
+  bool _isProcessing = false;
 
-  Future<void> _launchURL() async {
-    final Uri url = Uri.parse('https://www.remove.bg/upload');
-    if (!await launchUrl(url)) throw 'Could not launch $url';
-  }
-
+  // Picks the base image (the user's avatar) from the gallery
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );
     if (pickedFile != null) {
+      final file = File(pickedFile.path);
       setState(() {
-        _userImage = File(pickedFile.path);
+        _userImage = file;
+      });
+      
+      //  Automatically trigger the AI once the image is selected! 
+      await _processImageWithAI(file);
+    }
+  }
+
+  // Automated On-Device AI processing function
+  Future<void> _processImageWithAI(File originalImage) async {
+    setState(() {
+      _isProcessing = true;
+    });
+
+    try {
+      // Prepare the imag
+      final inputImage = InputImage.fromFile(originalImage); 
+      
+      //Initialize the AI Segmenter
+      final options = SubjectSegmenterOptions(
+        enableForegroundBitmap: true,
+        enableForegroundConfidenceMask: false, 
+        enableMultipleSubjects: SubjectResultOptions( 
+          enableConfidenceMask: false,
+          enableSubjectBitmap: false,
+        ),
+      );
+      final segmenter = SubjectSegmenter(options: options); 
+
+      //Run the on-device AI processing
+      final result = await segmenter.processImage(inputImage); 
+      
+      // Retriev the  cutout
+      final foregroundBitmap = result.foregroundBitmap;
+      
+      if (foregroundBitmap != null) {
+        debugPrint("AI successfully cut out the subject!");
+        // TODO: Map the bitmap bytes into an image file for layering
+      }
+
+      segmenter.close(); 
+
+    } catch (e) {
+      debugPrint("AI Processing Error: $e");
+    } finally {
+      setState(() {
+        _isProcessing = false;
       });
     }
   }
@@ -52,87 +97,13 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                "Setup Your AR Avatar",
+                "Setup Your AR Wardrobe",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
 
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.auto_fix_high,
-                        size: 40,
-                        color: Colors.purpleAccent,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Step 1: Create your cutout",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: _launchURL,
-                            icon: const Icon(Icons.open_in_browser),
-                            label: const Text("Open Remove.bg"),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.help_outline),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("How To Do"),
-                                    content: const Text(''' 
-1. Open Remove.bg using the button.
-
-2. Upload a full-body photo of yourself.
-
-3. Switch to the 'Cutout' tab and use Eraser.
-
-4. Erase the clothing item you want to 
-   replace (e.g., your shirt).
-
-5. Download the image.
-                                    '''),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("close"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
+              // Select Your Avatar
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(
@@ -144,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Icon(
                         _userImage == null
-                            ? Icons.image_search
+                            ? Icons.person_add_alt_1
                             : Icons.check_circle,
                         size: 40,
                         color: _userImage == null
@@ -154,8 +125,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 10),
                       Text(
                         _userImage == null
-                            ? "Step 2: Load your downloaded image"
-                            : "Image Loaded Successfully!",
+                            ? "Step 1: Choose your model photo"
+                            : "Model Photo Loaded!",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -174,11 +145,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
+              const SizedBox(height: 20),
+
+              // AI Status Display
+              if (_isProcessing)
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(color: Colors.purpleAccent),
+                        SizedBox(height: 15),
+                        Text(
+                          "AI is analyzing and cutting out items...",
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
               const Spacer(),
               SizedBox(
                 height: 60,
                 child: FilledButton.icon(
-                  onPressed: _userImage == null
+                  onPressed: _userImage == null || _isProcessing
                       ? null
                       : () {
                           Navigator.push(
